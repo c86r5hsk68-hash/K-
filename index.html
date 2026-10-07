@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KÔ — The Intelligent Financial</title>
+<style>
+  /* ============ STYLES ============ */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0f1115;
+    color: #e8eaed;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+  header {
+    text-align: center;
+    padding: 30px 20px 20px;
+    border-bottom: 1px solid #232730;
+    margin-bottom: 30px;
+  }
+  header h1 {
+    font-size: 2.2rem;
+    background: linear-gradient(90deg, #4ade80, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  header p { color: #9ca3af; font-size: 0.95rem; }
+
+  nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+  nav button {
+    background: #1a1d24;
+    color: #e8eaed;
+    border: 1px solid #2a2f3a;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  nav button:hover { background: #232730; border-color: #4ade80; }
+  nav button.active {
+    background: #4ade80;
+    color: #0f1115;
+    border-color: #4ade80;
+    font-weight: 600;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn 0.3s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: translateY(0);} }
+
+  .card {
+    background: #1a1d24;
+    border: 1px solid #2a2f3a;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+    color: #4ade80;
+  }
+  .card h3 { font-size: 1rem; margin: 16px 0 8px; color: #22d3ee; }
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin-bottom: 6px;
+    margin-top: 12px;
+  }
+  input, select, textarea {
+    width: 100%;
+    background: #0f1115;
+    border: 1px solid #2a2f3a;
+    color: #e8eaed;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #4ade80;
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  button.btn {
+    background: #4ade80;
+    color: #0f1115;
+    border: none;
+    padding: 11px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 16px;
+    transition: opacity 0.2s;
+  }
+  button.btn:hover { opacity: 0.85; }
+  button.btn.secondary {
+    background: transparent;
+    color: #4ade80;
+    border: 1px solid #4ade80;
+  }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+
+  .score-display {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .score-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    font-size: 2.5rem;
+    font-weight: 700;
+    border: 6px solid #4ade80;
+    color: #4ade80;
+    margin-bottom: 12px;
+  }
+  .score-circle.medium { border-color: #fbbf24; color: #fbbf24; }
+  .score-circle.low { border-color: #ef4444; color: #ef4444; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .stat {
+    background: #0f1115;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid #2a2f3a;
+  }
+  .stat .label { font-size: 0.75rem; color: #9ca3af; text-transform: uppercase; }
+  .stat .value { font-size: 1.4rem; font-weight: 700; color: #4ade80; margin-top: 4px; }
+
+  .advice-item {
+    background: #0f1115;
+    border-left: 3px solid #22d3ee;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 0.92rem;
+  }
+  .advice-item.warn { border-left-color: #fbbf24; }
+  .advice-item.good { border-left-color: #4ade80; }
+
+  .challenge {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0f1115;
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #2a2f3a;
+  }
+  .challenge.done { border-color: #4ade80; opacity: 0.6; }
+  .challenge-info strong { display: block; margin-bottom: 4px; }
+  .challenge-info small { color: #9ca3af; font-size: 0.8rem; }
+
+  .review {
+    background: #0f1115;
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #2a2f3a;
+  }
+  .review .meta { font-size: 0.75rem; color: #9ca3af; margin-bottom: 6px; }
+  .stars { color: #fbbf24; letter-spacing: 2px; }
+
+  .empty { color: #6b7280; font-style: italic; font-size: 0.9rem; padding: 12px 0; }
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #4ade80;
+    color: #0f1115;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>KÔ</h1>
+    <p>The Intelligent Financial — Understand your money. Build your future.</p>
+  </header>
+
+  <nav>
+    <button data-panel="dashboard" class="active">Dashboard</button>
+    <button data-panel="income">Income</button>
+    <button data-panel="expenses">Expenses</button>
+    <button data-panel="goals">Goals</button>
+    <button data-panel="challenges">Challenges</button>
+    <button data-panel="reviews">Reviews</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="panel active">
+    <div class="card">
+      <h2>Your Financial Score</h2>
+      <div class="score-display">
+        <div id="scoreCircle" class="score-circle">—</div>
+        <div id="scoreLabel" style="color:#9ca3af;font-size:0.9rem;">Add income and expenses to see your score</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Overview</h2>
+      <div class="stat-grid">
+        <div class="stat"><div class="label">Monthly Income</div><div class="value" id="statIncome">0 GHS</div></div>
+        <div class="stat"><div class="label">Monthly Expenses</div><div class="value" id="statExpenses" style="color:#ef4444;">0 GHS</div></div>
+        <div class="stat"><div class="label">Potential Savings</div><div class="value" id="statSavings">0 GHS</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>KÔ's Advice</h2>
+      <div id="adviceList"><p class="empty">No data yet. Start by adding your income.</p></div>
+    </div>
+  </section>
+
+  <!-- INCOME -->
+  <section id="income" class="panel">
+    <div class="card">
+      <h2>Add Income</h2>
+      <label>Income source</label>
+      <input id="incomeSource" placeholder="e.g. Salary, Freelance, Business">
+      <label>Amount (GHS)</label>
+      <input id="incomeAmount" type="number" placeholder="1500">
+      <button class="btn" onclick="addIncome()">Add Income</button>
+    </div>
+    <div class="card">
+      <h2>Your Income</h2>
+      <div id="incomeList"></div>
+    </div>
+  </section>
+
+  <!-- EXPENSES -->
+  <section id="expenses" class="panel">
+    <div class="card">
+      <h2>Add Expense</h2>
+      <label>Category</label>
+      <select id="expenseCategory">
+        <option>Rent</option>
+        <option>Food</option>
+        <option>Transport</option>
+        <option>Outings</option>
+        <option>Impulse purchases</option>
+        <option>Airtime/Data</option>
+        <option>Family support</option>
+        <option>Utilities</option>
+        <option>Other</option>
+      </select>
+      <label>Description (optional)</label>
+      <input id="expenseDesc" placeholder="e.g. Lunch with friends">
+      <label>Amount (GHS)</label>
+      <input id="expenseAmount" type="number" placeholder="100">
+      <button class="btn" onclick="addExpense()">Add Expense</button>
+    </div>
+    <div class="card">
+      <h2>Your Expenses</h2>
+      <div id="expenseList"></div>
+    </div>
+  </section>
+
+  <!-- GOALS -->
+  <section id="goals" class="panel">
+    <div class="card">
+      <h2>Set a Financial Goal</h2>
+      <label>Goal name</label>
+      <input id="goalName" placeholder="e.g. Emergency fund, New laptop">
+      <label>Target amount (GHS)</label>
+      <input id="goalAmount" type="number" placeholder="5000">
+      <button class="btn" onclick="addGoal()">Add Goal</button>
+    </div>
+    <div class="card">
+      <h2>Your Goals</h2>
+      <div id="goalList"></div>
+    </div>
+  </section>
+
+  <!-- CHALLENGES -->
+  <section id="challenges" class="panel">
+    <div class="card">
+      <h2>Savings Challenges</h2>
+      <p style="color:#9ca3af;font-size:0.9rem;margin-bottom:16px;">
+        Complete challenges to build better habits. You'll be notified when one is updated.
+      </p>
+      <div id="challengeList"></div>
+      <button class="btn secondary" onclick="generateChallenge()">Generate New Challenge</button>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviews" class="panel">
+    <div class="card">
+      <h2>Share Your Feedback</h2>
+      <label>Your name</label>
+      <input id="reviewName" placeholder="Your name">
+      <label>Rating</label>
+      <select id="reviewRating">
+        <option value="5">★★★★★ — Excellent</option>
+        <option value="4">★★★★ — Good</option>
+        <option value="3">★★★ — Okay</option>
+        <option value="2">★★ — Needs work</option>
+        <option value="1">★ — Poor</option>
+      </select>
+      <label>Your review or suggestion</label>
+      <textarea id="reviewText" placeholder="What do you like? What could be better?"></textarea>
+      <button class="btn" onclick="addReview()">Submit Review</button>
+    </div>
+    <div class="card">
+      <h2>What People Are Saying</h2>
+      <div id="reviewList"></div>
+    </div>
+  </section>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============ DATA STORAGE ============ */
+/* We use localStorage — your browser saves data on your own device.
+   Later you'll swap this for a real database + user accounts. */
+
+let state = {
+  income: [],
+  expenses: [],
+  goals: [],
+  challenges: [],
+  reviews: [],
+};
+
+function save() {
+  localStorage.setItem('ko-data', JSON.stringify(state));
+}
+function load() {
+  const raw = localStorage.getItem('ko-data');
+  if (raw) state = JSON.parse(raw);
+}
+
+/* ============ HELPERS ============ */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function fmt(n) { return Number(n).toLocaleString('en-GH') + ' GHS'; }
+function uid() { return Date.now() + Math.random().toString(36).slice(2,7); }
+
+/* ============ NAVIGATION ============ */
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.panel).classList.add('active');
+  });
+});
+
+/* ============ INCOME ============ */
+function addIncome() {
+  const source = document.getElementById('incomeSource').value.trim();
+  const amount = parseFloat(document.getElementById('incomeAmount').value);
+  if (!source || !amount || amount <= 0) return toast('Please fill in both fields');
+  state.income.push({ id: uid(), source, amount });
+  document.getElementById('incomeSource').value = '';
+  document.getElementById('incomeAmount').value = '';
+  save(); renderAll(); toast('Income added');
+}
+
+/* ============ EXPENSES ============ */
+function addExpense() {
+  const category = document.getElementById('expenseCategory').value;
+  const desc = document.getElementById('expenseDesc').value.trim();
+  const amount = parseFloat(document.getElementById('expenseAmount').value);
+  if (!amount || amount <= 0) return toast('Enter a valid amount');
+  state.expenses.push({ id: uid(), category, desc, amount });
+  document.getElementById('expenseDesc').value = '';
+  document.getElementById('expenseAmount').value = '';
+  save(); renderAll(); toast('Expense added');
+}
+
+/* ============ GOALS ============ */
+function addGoal() {
+  const name = document.getElementById('goalName').value.trim();
+  const amount = parseFloat(document.getElementById('goalAmount').value);
+  if (!name || !amount || amount <= 0) return toast('Fill in goal name and amount');
+  state.goals.push({ id: uid(), name, amount, saved: 0 });
+  document.getElementById('goalName').value = '';
+  document.getElementById('goalAmount').value = '';
+  save(); renderAll(); toast('Goal added');
+}
+
+/* ============ CHALLENGES ============ */
+const CHALLENGE_POOL = [
+  { title: 'No-spend weekend', desc: 'Spend zero on outings this weekend.', reward: 5 },
+  { title: 'Cook at home for 5 days', desc: 'Skip takeout and restaurants for 5 days.', reward: 8 },
+  { title: 'Track every cedi for 7 days', desc: 'Log every single expense for a week.', reward: 6 },
+  { title: 'Cut one subscription', desc: 'Cancel or pause one subscription you don\'t use.', reward: 7 },
+  { title: 'Save 10% of next income', desc: 'Put aside 10% the moment you get paid.', reward: 10 },
+  { title: 'No impulse buys for 3 days', desc: 'Wait 24 hours before any non-essential purchase.', reward: 5 },
+];
+
+function generateChallenge() {
+  const c = CHALLENGE_POOL[Math.floor(Math.random() * CHALLENGE_POOL.length)];
+  state.challenges.push({ id: uid(), ...c, done: false });
+  save(); renderAll();
+  toast('New challenge created!');
+}
+function toggleChallenge(id) {
+  const ch = state.challenges.find(c => c.id === id);
+  if (!ch) return;
+  ch.done = !ch.done;
+  save(); renderAll();
+  toast(ch.done ? 'Challenge completed! +' + ch.reward + ' score' : 'Challenge reopened');
+}
+
+/* ============ REVIEWS ============ */
+function addReview() {
+  const name = document.getElementById('reviewName').value.trim() || 'Anonymous';
+  const rating = parseInt(document.getElementById('reviewRating').value);
+  const text = document.getElementById('reviewText').value.trim();
+  if (!text) return toast('Please write a review');
+  state.reviews.unshift({ id: uid(), name, rating, text, date: new Date().toLocaleDateString() });
+  document.getElementById('reviewName').value = '';
+  document.getElementById('reviewText').value = '';
+  save(); renderAll(); toast('Thanks for your feedback!');
+}
+
+/* ============ SCORE + ADVICE LOGIC ============ */
+function calcTotals() {
+  const totalIncome = state.income.reduce((s, i) => s + i.amount, 0);
+  const totalExpenses = state.expenses.reduce((s, e) => s + e.amount, 0);
+  return { totalIncome, totalExpenses, savings: totalIncome - totalExpenses };
+}
+
+function calcScore() {
+  const { totalIncome, totalExpenses } = calcTotals();
+  if (totalIncome === 0) return 0;
+  const savingsRate = (totalIncome - totalExpenses) / totalIncome;
+  let score = Math.round(savingsRate * 100);
+  // Reward completed challenges
+  const completed = state.challenges.filter(c => c.done).reduce((s, c) => s + c.reward, 0);
+  score += completed;
+  // Reward having goals
+  score += Math.min(state.goals.length * 3, 9);
+  return Math.max(0, Math.min(100, score));
+}
+
+function generateAdvice() {
+  const advice = [];
+  const { totalIncome, totalExpenses, savings } = calcTotals();
+
+  if (totalIncome === 0) {
+    return [{ text: 'Start by adding your monthly income so KÔ can analyse your situation.', type: 'warn' }];
+  }
+
+  // Savings rate
+  const savingsRate = (totalIncome - totalExpenses) / totalIncome;
+  if (savingsRate < 0) {
+    advice.push({ text: `You are spending ${fmt(Math.abs(savings))} more than you earn. This is urgent — let's cut the biggest categories first.`, type: 'warn' });
+  } else if (savingsRate < 0.1) {
+    advice.push({ text: `You're only saving ${Math.round(savingsRate*100)}% of your income. Aim for at least 20% to build real momentum.`, type: 'warn' });
+  } else if (savingsRate < 0.2) {
+    advice.push({ text: `You're saving ${Math.round(savingsRate*100)}%. That's a good start — push a little more to reach 20%.`, type: '' });
+  } else {
+    advice.push({ text: `Excellent! You're saving ${Math.round(savingsRate*100)}% of your income. Keep it up.`, type: 'good' });
+  }
+
+  // Category analysis
+  const byCategory = {};
+  state.expenses.forEach(e => {
+    byCategory[e.category] = (byCategory[e.category] || 0) + e.amount;
+  });
+  const sorted = Object.entries(byCategory).sort((a,b) => b[1] - a[1]);
+  const top = sorted[0];
+  if (top) {
+    const pct = Math.round((top[1] / totalExpenses) * 100);
+    advice.push({ text: `Your biggest expense is "${top[0]}" at ${fmt(top[1])} (${pct}% of spending). If you reduce it by 20%, you'd save about ${fmt(top[1]*0.2)} monthly.`, type: '' });
+  }
+
+  // Discretionary categories
+  const funSpend = (byCategory['Outings'] || 0) + (byCategory['Impulse purchases'] || 0);
+  if (funSpend > totalIncome * 0.15) {
+    advice.push({ text: `You spend ${fmt(funSpend)} on outings and impulse purchases — over 15% of your income. Cutting this by 20% would save ${fmt(funSpend*0.2)} per month.`, type: 'warn' });
+  }
+
+  // Goal projection
+  if (state.goals.length > 0 && savings > 0) {
+    state.goals.forEach(g => {
+      const months = Math.ceil(g.amount / savings);
+      advice.push({ text: `At your current savings rate, you'll reach "${g.name}" in about ${months} month${months>1?'s':''}.`, type: 'good' });
+    });
+  } else if (state.goals.length > 0 && savings <= 0) {
+    advice.push({ text: `You have goals set but aren't saving yet. Let's find expenses to cut so you can start.`, type: 'warn' });
+  }
+
+  return advice;
+}
+
+/* ============ RENDER ============ */
+function renderAll() {
+  // Income list
+  const il = document.getElementById('incomeList');
+  il.innerHTML = state.income.length === 0
+    ? '<p class="empty">No income added yet.</p>'
+    : state.income.map(i => `
+        <div class="challenge">
+          <div class="challenge-info"><strong>${i.source}</strong><small>${fmt(i.amount)}</small></div>
+          <button class="btn secondary" style="margin:0;padding:6px 12px;font-size:0.8rem;" onclick="removeIncome('${i.id}')">Remove</button>
+        </div>`).join('');
+
+  // Expense list
+  const el = document.getElementById('expenseList');
+  el.innerHTML = state.expenses.length === 0
+    ? '<p class="empty">No expenses added yet.</p>'
+    : state.expenses.map(e => `
+        <div class="challenge">
+          <div class="challenge-info"><strong>${e.category}</strong><small>${e.desc || '—'} • ${fmt(e.amount)}</small></div>
+          <button class="btn secondary" style="margin:0;padding:6px 12px;font-size:0.8rem;" onclick="removeExpense('${e.id}')">Remove</button>
+        </div>`).join('');
+
+  // Goals
+  const gl = document.getElementById('goalList');
+  gl.innerHTML = state.goals.length === 0
+    ? '<p class="empty">No goals yet. What are you saving for?</p>'
+    : state.goals.map(g => `
+        <div class="challenge">
+          <div class="challenge-info"><strong>${g.name}</strong><small>Target: ${fmt(g.amount)}</small></div>
+          <button class="btn secondary" style="margin:0;padding:6px 12px;font-size:0.8rem;" onclick="removeGoal('${g.id}')">Remove</button>
+        </div>`).join('');
+
+  // Challenges
+  const cl = document.getElementById('challengeList');
+  cl.innerHTML = state.challenges.length === 0
+    ? '<p class="empty">No challenges yet. Click below to generate one.</p>'
+    : state.challenges.map(c => `
+        <div class="challenge ${c.done ? 'done' : ''}">
+          <div class="challenge-info">
+            <strong>${c.done ? '✅ ' : ''}${c.title}</strong>
+            <small>${c.desc}</small>
+          </div>
+          <button class="btn ${c.done ? 'secondary' : ''}" style="margin:0;padding:8px 14px;font-size:0.8rem;" onclick="toggleChallenge('${c.id}')">
+            ${c.done ? 'Undo' : 'Complete'}
+          </button>
+        </div>`).join('');
+
+  // Reviews
+  const rl = document.getElementById('reviewList');
+  rl.innerHTML = state.reviews.length === 0
+    ? '<p class="empty">No reviews yet. Be the first!</p>'
+    : state.reviews.map(r => `
+        <div class="review">
+          <div class="meta">${r.name} • ${r.date} • <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></div>
+          <div>${r.text}</div>
+        </div>`).join('');
+
+  // Dashboard
+  const { totalIncome, totalExpenses, savings } = calcTotals();
+  document.getElementById('statIncome').textContent = fmt(totalIncome);
+  document.getElementById('statExpenses').textContent = fmt(totalExpenses);
+  document.getElementById('statSavings').textContent = fmt(Math.max(0, savings));
+
+  const score = calcScore();
+  const circle = document.getElementById('scoreCircle');
+  circle.textContent = totalIncome === 0 ? '—' : score;
+  circle.className = 'score-circle' + (score >= 70 ? '' : score >= 40 ? ' medium' : ' low');
+  document.getElementById('scoreLabel').textContent =
+    totalIncome === 0 ? 'Add income and expenses to see your score' :
+    score >= 70 ? 'Excellent — you\'re managing your money well.' :
+    score >= 40 ? 'Getting there — keep improving your habits.' :
+    'Needs work — let\'s find savings together.';
+
+  // Advice
+  const adviceList = document.getElementById('adviceList');
+  adviceList.innerHTML = generateAdvice().map(a =>
+    `<div class="advice-item ${a.type}">${a.text}</div>`
+  ).join('');
+}
+
+/* ============ REMOVE ============ */
+function removeIncome(id) { state.income = state.income.filter(i => i.id !== id); save(); renderAll(); toast('Removed'); }
+function removeExpense(id) { state.expenses = state.expenses.filter(e => e.id !== id); save(); renderAll(); toast('Removed'); }
+function removeGoal(id) { state.goals = state.goals.filter(g => g.id !== id); save(); renderAll(); toast('Removed'); }
+
+/* ============ INIT ============ */
+load();
+renderAll();
+</script>
+</body>
+</html>
